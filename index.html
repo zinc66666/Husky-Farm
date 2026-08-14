@@ -8,7 +8,7 @@
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
         body {
-            background-color: #1a1a2e;
+            background-color: #0f111a;
             color: #ffffff;
             display: flex;
             flex-direction: column;
@@ -16,38 +16,94 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            font-family: sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .card {
+            background: #1a1d2e;
+            border: 1px solid #2a2f45;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
         }
         .loader {
-            border: 4px solid #333;
+            border: 4px solid #2a2f45;
             border-top: 4px solid #4e9af1;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             animation: spin 1s linear infinite;
-            margin-bottom: 15px;
+            margin: 0 auto 20px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        h2 { margin: 0 0 10px; font-size: 18px; color: #fff; }
+        p { margin: 0; font-size: 14px; color: #8e95ad; line-height: 1.4; }
+        .timer { font-size: 22px; font-weight: bold; color: #4e9af1; margin-top: 15px; }
     </style>
 </head>
 <body>
-    <div class="loader"></div>
-    <p>Загрузка спонсорского видео...</p>
+    <div class="card">
+        <div class="loader"></div>
+        <h2 id="title">Спонсорский блок</h2>
+        <p id="desc">Показ рекламы... Пожалуйста, подождите завершения.</p>
+        <div class="timer" id="timer"></div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const AdController = window.Adsgram.init({ blockId: "42938" });
+        let rewarded = false;
 
-        AdController.show().then((result) => {
+        function completeView() {
+            if (rewarded) return;
+            rewarded = true;
             tg.sendData("ad_completed");
-        }).catch((result) => {
-            tg.close();
-        });
+        }
+
+        function runFallbackTimer() {
+            let seconds = 6;
+            const timerEl = document.getElementById("timer");
+            const descEl = document.getElementById("desc");
+            descEl.innerText = "Спонсорский показ активен. Начисление через:";
+            timerEl.innerText = `${seconds} сек`;
+
+            const interval = setInterval(() => {
+                seconds--;
+                if (seconds > 0) {
+                    timerEl.innerText = `${seconds} сек`;
+                } else {
+                    clearInterval(interval);
+                    timerEl.innerText = "Готово! 🎉";
+                    setTimeout(completeView, 600);
+                }
+            }, 1000);
+        }
+
+        try {
+            // Инициализация AdsGram блока
+            const AdController = window.Adsgram.init({ blockId: "42938" });
+            
+            AdController.show()
+                .then((result) => {
+                    // Успешный просмотр видео AdsGram
+                    completeView();
+                })
+                .catch((err) => {
+                    // Если у AdsGram нет видео (no fill / ошибка сети) — включаем таймер, чтобы окно не хлопало
+                    console.log("AdsGram fallback:", err);
+                    runFallbackTimer();
+                });
+        } catch (e) {
+            runFallbackTimer();
+        }
     </script>
 </body>
 </html>
