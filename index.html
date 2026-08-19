@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0f111a">
+<title>Husky Farm — комната геймера</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="scene"></canvas>
+    <div id="hud"></div>
+    <div id="fx"></div>
+    <div id="overlay" aria-live="polite"></div>
+  </div>
+  <div id="collect"></div>
+  <nav id="nav"></nav>
+</div>
+<div id="modal"></div>
+<div id="toasts"></div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
